@@ -9,7 +9,7 @@ const connectDB = async () => {
     await mongoose.connect(MONGO_URI);
     console.log("MongoDB connected successfully");
   } catch (error) {
-    throw new ApiError(500, "MongoDB connection error", error);
+    throw new ApiError(500, error);
   }
 };
 

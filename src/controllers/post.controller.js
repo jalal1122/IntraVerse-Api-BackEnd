@@ -170,13 +170,6 @@ const getPostById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Post not found");
   }
 
-  // Check if the user is the author of the post
-
-  // if author is loggedin or authenticated
-  if (post.author.toString() !== userId) {
-    throw new ApiError(403, "You are not authorized to view this post");
-  }
-
   // get the logged user ID from cookies
   const userId = req.cookies?.loggedUser;
 

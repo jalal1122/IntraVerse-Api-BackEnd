@@ -3,7 +3,6 @@ import postsRouter from "./routes/posts.route.js";
 import userRouter from "./routes/user.route.js";
 import commentRouter from "./routes/comments.route.js";
 import cookieParser from "cookie-parser";
-import likeDislikeRouter from "./routes/likeDislike.route.js";
 import cors from "cors";
 
 // initialize express app
@@ -30,6 +29,5 @@ app.get("/", (req, res) => {
 app.use("/api", postsRouter);
 app.use("/api/user", userRouter);
 app.use("/api/comments", commentRouter);
-app.use("/api", likeDislikeRouter);
 
 export default app;
