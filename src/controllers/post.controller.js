@@ -2,6 +2,7 @@ import Post from "../models/posts.models.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import uploadOnCloudinary from "../utils/cloudinary.js";
 
 // Create a new post
 // This function creates a new post with the provided data and saves it to the database.
@@ -20,13 +21,29 @@ const createPost = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Title, content, and category are required");
   }
 
-  const newPost = await Post.create({
-    title,
-    content,
-    author, // Assuming req.user is populated with the authenticated user's data
-    category,
-    tags: tags || [], // Tags are optional, default to an empty array
-  });
+  let newPost;
+
+  if (req.file) {
+    const result = await uploadOnCloudinary(req.file.path);
+
+    // If the file is uploaded successfully
+    newPost = await Post.create({
+      title,
+      content,
+      author, // Assuming req.user is populated with the authenticated user's data
+      category,
+      tags: tags || [], // Tags are optional, default to an empty array
+      image: result.secure_url, // Store the URL of the uploaded image
+    });
+  } else {
+    newPost = await Post.create({
+      title,
+      content,
+      author, // Assuming req.user is populated with the authenticated user's data
+      category,
+      tags: tags || [], // Tags are optional, default to an empty array
+    });
+  }
 
   if (!newPost) {
     // If the post creation fails, it throws an ApiError with a 500 status code
@@ -90,9 +107,8 @@ const deletePostById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Post deleted successfully", deletedPost));
 });
 
-// Get All Posts
-// This function retrieves all posts from the database and sends them as a JSON response.
-const getAllPosts = asyncHandler(async (req, res) => {
+// Get All Posts(For Admins)
+const getAllAdminPosts = asyncHandler(async (req, res) => {
   const author = req.cookies?.loggedUser; // Assuming the author's ID is stored in cookies
 
   // Check if the user is logged in
@@ -131,6 +147,60 @@ const getAllPosts = asyncHandler(async (req, res) => {
   // Add author filter if provided
   if (author) {
     filters.push({ author: author });
+  }
+
+  // Add tag filter if provided
+  if (tag) {
+    filters.push({ tags: { $in: [tag] } });
+  }
+
+  // Combine all filters with $and operator, or use empty object if no filters
+  const query = filters.length > 0 ? { $and: filters } : {};
+
+  // Execute query with pagination and sorting
+  const posts = await Post.find(query)
+    .skip(skip)
+    .limit(limitNum)
+    .sort({ createdAt: sortOrder });
+
+  if (posts.length === 0) {
+    throw new ApiError(404, "No posts found matching the criteria");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Posts retrieved successfully", posts));
+});
+
+// Get All Posts
+// This function retrieves all posts from the database and sends them as a JSON response.
+const getAllPosts = asyncHandler(async (req, res) => {
+  // get the query parameters
+  const { search, category, page, limit, tag, sort } = req.query;
+
+  // Calculate pagination
+  const pageNum = page ? Math.max(1, parseInt(page)) : 1; // Ensure page is at least 1
+  const limitNum = limit ? Math.max(1, parseInt(limit)) : 10; // Default limit to 10
+  const skip = (pageNum - 1) * limitNum; // Calculate the number of posts to skip
+
+  // Determine sort order
+  const sortOrder = sort === "asc" ? 1 : -1; // Default to descending (-1)
+  // Build query filters
+  const filters = [];
+
+  // Add search filter if provided
+  if (search) {
+    filters.push({
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+      ],
+    });
+  }
+
+  // Add category filter if provided
+  if (category) {
+    filters.push({ category: { $regex: category, $options: "i" } });
   }
 
   // Add tag filter if provided
@@ -237,13 +307,31 @@ const updatePostbyId = asyncHandler(async (req, res) => {
     throw new ApiError(403, "You are not authorized to update this post");
   }
 
+  // Debug logging
+  console.log("Update request body:", req.body);
+  console.log("Update request file:", req.file);
+
+  // Check if req.body exists and is not empty
+  if (!req.body || Object.keys(req.body).length === 0) {
+    throw new ApiError(400, "Request body is empty or malformed. Please ensure you're sending data");
+  }
+
   // get the post data from the request body
   const { title, content, author, category, tags } = req.body;
+
+  // Prepare update data
+  const updateData = { title, content, author, category, tags };
+
+  // If a new image is uploaded, update the image field
+  if (req.file) {
+    const result = await uploadOnCloudinary(req.file.path);
+    updateData.image = [result.secure_url];
+  }
 
   // Find the post by ID and update it with the new data
   const updatedPost = await Post.findByIdAndUpdate(
     id,
-    { title, content, author, category, tags },
+    updateData,
     { new: true } // This option returns the updated document
   );
 
@@ -261,4 +349,5 @@ export {
   getPostById,
   getPostStats,
   updatePostbyId,
+  getAllAdminPosts,
 };

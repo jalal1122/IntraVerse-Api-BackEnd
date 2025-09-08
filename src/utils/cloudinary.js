@@ -15,12 +15,6 @@ const uploadOnCloudinary = async (filePath) => {
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
 
-    console.log("Cloudinary config:", {
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY ? "***SET***" : "NOT SET",
-      api_secret: process.env.CLOUDINARY_API_SECRET ? "***SET***" : "NOT SET",
-    });
-
     // Upload the file to Cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto", // Automatically determine the resource type
@@ -32,26 +26,10 @@ const uploadOnCloudinary = async (filePath) => {
       throw new ApiError(500, "Failed to upload file to Cloudinary");
     }
 
-    // Optionally, delete the file from the local filesystem after uploading
-    try {
-      fs.unlinkSync(filePath);
-      console.log("File deleted from local filesystem successfully.", filePath);
-    } catch (error) {
-      console.error("Error deleting file from local filesystem:", error);
-    }
-
     console.log("File uploaded to Cloudinary successfully:", result.secure_url);
 
     return result; // Return the result of the upload
   } catch (error) {
-    if (filePath && fs.existsSync(filePath)) {
-      try {
-        fs.unlinkSync(filePath); // Delete the file if it exists
-        console.log("File deleted after upload failure:", filePath);
-      } catch (deleteError) {
-        console.error("Error deleting file after upload failure:", deleteError);
-      }
-    }
     // If an error occurs, throw an ApiError with a 500 status code and a message
     throw new ApiError(500, "Failed to upload file to Cloudinary", error);
   }

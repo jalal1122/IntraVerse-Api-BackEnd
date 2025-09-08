@@ -10,6 +10,11 @@ const postSchema = new mongoose.Schema(
     category: { type: String, required: true },
     tags: [String],
     comments: [{ type: Schema.ObjectId, ref: "Comment" }], // Reference
+    image: {
+      type: String,
+      default:
+        "https://www.shutterstock.com/image-vector/illustration-default-avatar-profile-placeholder-260nw-1757107944.jpg",
+    },
     views: {
       type: Number,
       default: 0,

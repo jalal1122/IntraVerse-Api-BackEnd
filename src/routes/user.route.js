@@ -9,7 +9,7 @@ import upload from "../middleware/multer.middleware.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/register", upload.single("profilePicture"), registerUser);
+userRouter.post("/register", registerUser);
 
 userRouter.post("/login", loginUser);
 
