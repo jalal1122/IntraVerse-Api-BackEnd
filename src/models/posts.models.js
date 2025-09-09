@@ -9,6 +9,10 @@ const postSchema = new mongoose.Schema(
     author: { type: Schema.ObjectId, required: true, ref: "User" }, // Reference to the User model
     category: { type: String, required: true },
     tags: [String],
+    isTrending: {
+      type: Boolean,
+      default: false,
+    },
     comments: [{ type: Schema.ObjectId, ref: "Comment" }], // Reference
     image: {
       type: String,

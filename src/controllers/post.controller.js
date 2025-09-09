@@ -313,7 +313,10 @@ const updatePostbyId = asyncHandler(async (req, res) => {
 
   // Check if req.body exists and is not empty
   if (!req.body || Object.keys(req.body).length === 0) {
-    throw new ApiError(400, "Request body is empty or malformed. Please ensure you're sending data");
+    throw new ApiError(
+      400,
+      "Request body is empty or malformed. Please ensure you're sending data"
+    );
   }
 
   // get the post data from the request body
@@ -341,6 +344,74 @@ const updatePostbyId = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Post updated successfully", updatedPost));
 });
 
+// Refresh Trending Posts
+const refreshTrendingPosts = asyncHandler(async (req, res) => {
+  // get the user from the cookies
+  const userId = req.cookies?.loggedUser;
+
+  if (!userId) {
+    throw new ApiError(400, "User is not logged in");
+  }
+
+  // Fetch all posts
+  const posts = await Post.find({}).sort({ views: -1 });
+
+  // get the top 10 posts and mark them as trending
+  const updatedPosts = trendingAlgorithm(posts);
+
+  // respond with the updated trending posts
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "Trending posts refreshed successfully",
+        updatedPosts
+      )
+    );
+});
+
+// Get the Trending Posts
+const getTrendingPosts = asyncHandler(async (req, res) => {
+  // get the user from the cookies
+  const userId = req.cookies?.loggedUser;
+
+  if (!userId) {
+    throw new ApiError(400, "User is not logged in");
+  }
+
+  // Fetch trending posts
+  const trendingPosts = await Post.find({ isTrending: true });
+
+  // If no trending posts are found, return a 404 error
+  if (trendingPosts.length === 0) {
+    throw new ApiError(404, "No trending posts found");
+  }
+
+  // Respond with the trending posts
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "Trending posts retrieved successfully",
+        trendingPosts
+      )
+    );
+});
+
+// Algorithm to determine trending posts based on views
+const trendingAlgorithm = (posts) => {
+  const top10 = posts.slice(0, 10);
+
+  top10.forEach(async (post) => {
+    post.isTrending = true;
+    await post.save();
+  });
+
+  return top10;
+};
+
 export {
   createPost,
   deleteAllPosts,
@@ -350,4 +421,6 @@ export {
   getPostStats,
   updatePostbyId,
   getAllAdminPosts,
+  getTrendingPosts,
+  refreshTrendingPosts,
 };

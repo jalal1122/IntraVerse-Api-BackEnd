@@ -8,6 +8,8 @@ import {
   getPostStats,
   updatePostbyId,
   getAllAdminPosts,
+  refreshTrendingPosts,
+  getTrendingPosts,
 } from "../controllers/post.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../middleware/multer.middleware.js";
@@ -25,10 +27,16 @@ postsRouter.get("/admin/posts", authMiddleware, getAllAdminPosts);
 postsRouter.get("/posts", getAllPosts);
 
 // define the route for getting a post by ID
-postsRouter.get("/post/:id", authMiddleware, getPostById);
+postsRouter.get("/post/:id", getPostById);
+
+// define the route for getting trending posts
+postsRouter.get("/posts/trending", getTrendingPosts);
 
 // define the route for creating a new post
 postsRouter.post("/post", authMiddleware, upload.single("file"), createPost);
+
+// refresh the Trending posts
+postsRouter.post("/posts/refresh-trending", refreshTrendingPosts);
 
 // define the route for updating a post by ID
 postsRouter.put("/post/:id", authMiddleware, upload.single("file"), updatePostbyId);
