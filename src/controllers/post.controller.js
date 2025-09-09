@@ -373,13 +373,6 @@ const refreshTrendingPosts = asyncHandler(async (req, res) => {
 
 // Get the Trending Posts
 const getTrendingPosts = asyncHandler(async (req, res) => {
-  // get the user from the cookies
-  const userId = req.cookies?.loggedUser;
-
-  if (!userId) {
-    throw new ApiError(400, "User is not logged in");
-  }
-
   // Fetch trending posts
   const trendingPosts = await Post.find({ isTrending: true });
 
