@@ -4,6 +4,7 @@ import User from "../models/user.models.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import bcrypt from "bcryptjs";
 import uploadOnCloudinary from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 // cookie options
 const cookieOptions = {
@@ -156,4 +157,44 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User logged out successfully"));
 });
 
-export { registerUser, loginUser, logoutUser };
+const refreshToken = asyncHandler(async (req, res) => {
+  const { refreshToken: incomingRefreshToken } = req.cookies;
+
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "No refresh token provided");
+  }
+
+  // Verify the refresh token
+  const decoded = jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+  if (!decoded) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  // Find the user by ID and refresh token
+  const user = await User.findOne({
+    _id: decoded.id,
+    refreshToken: incomingRefreshToken,
+  });
+
+  if (!user) {
+    throw new ApiError(401, "Invalid refresh token or user not found");
+  }
+
+  // Generate new access and refresh tokens
+  const newAccessToken = await user.generateAccessToken();
+
+  // respond with new tokens
+  res
+    .status(200)
+    .cookie("accessToken", newAccessToken, cookieOptions)
+    .json(
+      new ApiResponse(200, "Token refreshed successfully", {
+        accessToken: newAccessToken,
+      })
+    );
+});
+
+export { registerUser, loginUser, logoutUser, refreshToken };
