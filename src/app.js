@@ -9,11 +9,13 @@ import cors from "cors";
 const app = express();
 
 // Configure CORS
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'], // Vite dev server ports
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://intraaverse.netlify.app"], // Vite dev server ports
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  })
+);
 
 // Middleware to parse JSON, URL-encoded data and enable CORS
 app.use(express.json());
@@ -22,7 +24,7 @@ app.use(cookieParser());
 
 // default home route to test the server
 app.get("/", (req, res) => {
-  res.send("Hello, for my first Blog Api");
+  res.send("Welcome to my IntraVerse API");
 });
 
 // use the router middleware for handling routes
