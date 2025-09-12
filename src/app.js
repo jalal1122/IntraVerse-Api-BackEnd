@@ -4,6 +4,7 @@ import userRouter from "./routes/user.route.js";
 import commentRouter from "./routes/comments.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import ApiError from "./utils/ApiError.js";
 
 // initialize express app
 const app = express();
@@ -31,5 +32,21 @@ app.get("/", (req, res) => {
 app.use("/api", postsRouter);
 app.use("/api/user", userRouter);
 app.use("/api/comments", commentRouter);
+
+app.use((err, req, res, next) => {
+  if (err instanceof ApiError) {
+    res.status(err.statusCode).json({
+      status: err.statusCode,
+      message: err.message,
+      errors: err.errors || null,
+    });
+  }
+  
+  console.error(err);
+  res.status(500).json({
+    status: 500,
+    message: "Internal Server Error",
+  });
+});
 
 export default app;
