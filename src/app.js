@@ -41,11 +41,12 @@ app.use((err, req, res, next) => {
       errors: err.errors || null,
     });
   }
-  
+
   console.error(err);
   res.status(500).json({
     status: 500,
-    message: "Internal Server Error",
+    message: err.message || "Internal Server Error",
+    errors: err.errors || null,
   });
 });
 
