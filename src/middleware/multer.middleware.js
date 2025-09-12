@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../public/temp")); // Specify the directory where files will be stored
+    cb(null, "/tmp");
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`); // Create a unique filename using the current timestamp and original name
