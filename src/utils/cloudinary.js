@@ -18,7 +18,7 @@ const uploadOnCloudinary = async (filePath) => {
     // Upload the file to Cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto", // Automatically determine the resource type
-      folder: "Blogify", // Specify the folder in Cloudinary where the file will be stored
+      folder: "IntraVerse", // Specify the folder in Cloudinary where the file will be stored
     });
 
     // If the upload is successful, return the result
@@ -26,10 +26,21 @@ const uploadOnCloudinary = async (filePath) => {
       throw new ApiError(500, "Failed to upload file to Cloudinary");
     }
 
+    try {
+      fs.unlinkSync(filePath); // Delete the local file after upload
+    } catch (error) {
+      console.error("Error deleting local file:", error);
+    }
+
     console.log("File uploaded to Cloudinary successfully:", result.secure_url);
 
     return result; // Return the result of the upload
   } catch (error) {
+    try {
+      fs.unlinkSync(filePath); // Delete the local file if an error occurs
+    } catch (err) {
+      console.error("Error deleting local file:", err);
+    }
     // If an error occurs, throw an ApiError with a 500 status code and a message
     throw new ApiError(500, "Failed to upload file to Cloudinary", error);
   }

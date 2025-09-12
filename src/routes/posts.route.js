@@ -29,17 +29,20 @@ postsRouter.get("/posts", getAllPosts);
 // define the route for getting a post by ID
 postsRouter.get("/post/:id", getPostById);
 
+// define the route for getting a post by ID (Admin)
+postsRouter.get("/admin/post/:id", authMiddleware, getPostById);
+
 // define the route for getting trending posts
 postsRouter.get("/posts/trending", getTrendingPosts);
 
 // define the route for creating a new post
-postsRouter.post("/post", authMiddleware, upload.single("file"), createPost);
+postsRouter.post("/post", authMiddleware, upload.single("image"), createPost);
 
 // refresh the Trending posts
 postsRouter.post("/posts/refresh-trending", refreshTrendingPosts);
 
 // define the route for updating a post by ID
-postsRouter.put("/post/:id", authMiddleware, upload.single("file"), updatePostbyId);
+postsRouter.put("/post/:id", authMiddleware, upload.single("image"), updatePostbyId);
 
 // define the route for deleting a post by ID
 postsRouter.delete("/post/:id", authMiddleware, deletePostById);

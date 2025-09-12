@@ -7,6 +7,10 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 // Create a new post
 // This function creates a new post with the provided data and saves it to the database.
 const createPost = asyncHandler(async (req, res) => {
+  console.log("Request body:", req.body);
+  
+
+
   const author = req.cookies?.loggedUser; // Assuming the author's ID is stored in cookies
 
   if (!author) {
@@ -328,7 +332,7 @@ const updatePostbyId = asyncHandler(async (req, res) => {
   // If a new image is uploaded, update the image field
   if (req.file) {
     const result = await uploadOnCloudinary(req.file.path);
-    updateData.image = [result.secure_url];
+    updateData.image = result.secure_url;
   }
 
   // Find the post by ID and update it with the new data
