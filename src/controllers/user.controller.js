@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production", // Set to true in production with HTTPS
-  // sameSite: "strict",
+  sameSite: "none",
   // maxAge: 24 * 60 * 60 * 1000, // 24 hours
 };
 
