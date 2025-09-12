@@ -11,7 +11,7 @@ const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production", // Set to true in production with HTTPS
   // sameSite: "strict",
-  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  // maxAge: 24 * 60 * 60 * 1000, // 24 hours
 };
 
 // Register a new user
