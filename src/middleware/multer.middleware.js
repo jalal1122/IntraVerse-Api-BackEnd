@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "/tmp");
+    cb(null, process.env.NODE_ENV === "production" ? "/tmp" : path.join(__dirname, "../../public/temp")); // Save files to 'uploads' directory
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`); // Create a unique filename using the current timestamp and original name

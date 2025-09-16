@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production", // Set to true in production with HTTPS
-  sameSite: "none",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Adjust based on your needs
   Expires: new Date((Date.now() + 24 * 60 * 60 * 1000) * 7), // 7 days
   maxAge: 24 * 60 * 60 * 1000 * 7, // 7 days
 };
