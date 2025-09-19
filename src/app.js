@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // get all post for sitemap
-const posts = await Post.find().select("slug");
+// const posts = await Post.find().select("slug");
 
 // Sitemap generation
 app.get("/sitemap.xml", async (req, res) => {
