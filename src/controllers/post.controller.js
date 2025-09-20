@@ -8,8 +8,6 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 // This function creates a new post with the provided data and saves it to the database.
 const createPost = asyncHandler(async (req, res) => {
   console.log("Request body:", req.body);
-  
-
 
   const author = req.cookies?.loggedUser; // Assuming the author's ID is stored in cookies
 
@@ -36,7 +34,7 @@ const createPost = asyncHandler(async (req, res) => {
       content,
       author, // Assuming req.user is populated with the authenticated user's data
       category,
-      tags: tags || [], // Tags are optional, default to an empty array
+      tags: tags.split(",").map((tag) => tag.trim()) || [], // Tags are optional, default to an empty array
       image: result.secure_url, // Store the URL of the uploaded image
     });
   } else {
@@ -327,7 +325,13 @@ const updatePostbyId = asyncHandler(async (req, res) => {
   const { title, content, author, category, tags } = req.body;
 
   // Prepare update data
-  const updateData = { title, content, author, category, tags };
+  const updateData = {
+    title,
+    content,
+    author,
+    category,
+    tags: tags.split(",").map((tag) => tag.trim()),
+  };
 
   // If a new image is uploaded, update the image field
   if (req.file) {
