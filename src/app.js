@@ -49,7 +49,7 @@ app.get("/sitemap.xml", async (req, res) => {
     ];
 
     const stream = new SitemapStream({
-      hostname: "https://intraaverse.netlify.app",
+      hostname: "https://intraverse.me",
     });
     res.writeHead(200, { "Content-Type": "application/xml" });
     const xml = await streamToPromise(Readable.from(links).pipe(stream));
@@ -65,8 +65,8 @@ app.get("/rss.xml", (req, res) => {
   const feed = new Rss({
     title: "IntraVerse Blog",
     description: "Latest articles from IntraVerse Blog",
-    feed_url: "https://intraaverse.netlify.app/rss.xml",
-    site_url: "https://intraaverse.netlify.app",
+    feed_url: "https://intraverse.me/rss.xml",
+    site_url: "https://intraverse.me",
     language: "en",
   });
 
@@ -74,7 +74,7 @@ app.get("/rss.xml", (req, res) => {
     feed.item({
       title: post.title,
       description: post.excerpt,
-      url: `https://intraaverse.netlify.app/post/${post.slug}`,
+      url: `https://intraverse.me/post/${post.slug}`,
       date: post.createdAt,
     });
   });
