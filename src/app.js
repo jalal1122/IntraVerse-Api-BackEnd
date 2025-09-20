@@ -31,9 +31,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// get all post for sitemap
-// const posts = await Post.find().select("slug");
-
 // Sitemap generation
 app.get("/sitemap.xml", async (req, res) => {
   try {
@@ -42,7 +39,7 @@ app.get("/sitemap.xml", async (req, res) => {
       { url: "/", changefreq: "daily", priority: 1.0 },
       { url: "/about", changefreq: "monthly", priority: 0.7 },
       ...posts.map((p) => ({
-        url: `/post/${p.slug}`,
+        url: `/post/${p._id}`,
         changefreq: "weekly",
         priority: 0.8,
       })),
@@ -61,7 +58,7 @@ app.get("/sitemap.xml", async (req, res) => {
 });
 
 // RSS feed generation
-app.get("/rss.xml", (req, res) => {
+app.get("/rss.xml", async (req, res) => {
   const feed = new Rss({
     title: "IntraVerse Blog",
     description: "Latest articles from IntraVerse Blog",
@@ -70,11 +67,18 @@ app.get("/rss.xml", (req, res) => {
     language: "en",
   });
 
+  let posts = [];
+  try {
+    posts = await Post.find(); // fetch from MongoDB or your DB
+  } catch (err) {
+    console.error(err);
+  }
+
   posts.forEach((post) => {
     feed.item({
       title: post.title,
-      description: post.excerpt,
-      url: `https://intraverse.me/post/${post.slug}`,
+      description: post.content,
+      url: `https://intraverse.me/post/${post._id}`,
       date: post.createdAt,
     });
   });
