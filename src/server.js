@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 
 // Load environment variables from .env file
-dotenv.config();
+// dotenv.config();
 
 
 // get the port from environment variables or default to 3000
