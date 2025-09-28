@@ -162,7 +162,7 @@ const getAllAdminPosts = asyncHandler(async (req, res) => {
   // Execute query with pagination and sorting
   const posts = await Post.find(query)
     .skip(skip)
-    .limit(limitNum)
+    // .limit(limitNum)
     .sort({ createdAt: sortOrder });
 
   if (posts.length === 0) {
