@@ -3,7 +3,7 @@ import ApiError from "../utils/ApiError.js";
 import User from "../models/user.models.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import bcrypt from "bcryptjs";
-import uploadOnCloudinary from "../utils/cloudinary.js";
+import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
 // cookie options

@@ -2,7 +2,7 @@ import Post from "../models/posts.models.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import uploadOnCloudinary from "../utils/cloudinary.js";
+import {uploadOnCloudinary} from "../utils/cloudinary.js";
 
 // Create a new post
 // This function creates a new post with the provided data and saves it to the database.
@@ -25,8 +25,12 @@ const createPost = asyncHandler(async (req, res) => {
 
   let newPost;
 
-  if (req.file) {
-    const result = await uploadOnCloudinary(req.file.path);
+  let images = [];
+  if (req.files && req.files.length > 0) {
+    const uploadPromises = req.files.map((file) =>
+      uploadOnCloudinary(file.path)
+    );
+    images = await Promise.all(uploadPromises);
 
     // If the file is uploaded successfully
     newPost = await Post.create({
@@ -35,7 +39,7 @@ const createPost = asyncHandler(async (req, res) => {
       author, // Assuming req.user is populated with the authenticated user's data
       category,
       tags: tags.split(",").map((tag) => tag.trim()) || [], // Tags are optional, default to an empty array
-      image: result.secure_url, // Store the URL of the uploaded image
+      image: images.map((image) => image.secure_url), // Store the URL of the uploaded image
     });
   } else {
     newPost = await Post.create({

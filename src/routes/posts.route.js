@@ -36,19 +36,26 @@ postsRouter.get("/admin/post/:id", authMiddleware, getPostById);
 postsRouter.get("/posts/trending", getTrendingPosts);
 
 // define the route for creating a new post
-postsRouter.post("/post", authMiddleware, upload.single("image"), createPost);
+postsRouter.post("/post", authMiddleware, upload.array("image", 10), createPost);
 
 // refresh the Trending posts
 postsRouter.post("/posts/refresh-trending", refreshTrendingPosts);
 
 // define the route for updating a post by ID
-postsRouter.put("/post/:id", authMiddleware, upload.single("image"), updatePostbyId);
+postsRouter.put(
+  "/post/:id",
+  authMiddleware,
+  upload.array("image", 10),
+  updatePostbyId
+);
 
 // define the route for deleting a post by ID
 postsRouter.delete("/post/:id", authMiddleware, deletePostById);
 
 // define the route for deleting all posts
 postsRouter.delete("/posts", deleteAllPosts);
+
+
 
 // export the router to be used in the main application
 export default postsRouter;
