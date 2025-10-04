@@ -66,15 +66,24 @@ app.use(cookieParser());
 app.get("/sitemap.xml", async (req, res) => {
   try {
     const SITE_URL = process.env.SITE_URL || "https://intraverse.me";
-    const posts = await Post.find().select("_id updatedAt").lean();
-    const links = [
+
+    // Central list of static pages
+    const staticPages = [
       { url: "/", changefreq: "daily", priority: 1.0 },
       { url: "/about", changefreq: "monthly", priority: 0.7 },
+      { url: "/contact", changefreq: "monthly", priority: 0.5 },
+      { url: "/privacy-policy", changefreq: "yearly", priority: 0.4 },
+      { url: "/terms-of-service", changefreq: "yearly", priority: 0.4 },
+    ];
+
+    const posts = await Post.find().select("_id updatedAt").lean();
+    const links = [
+      ...staticPages,
       ...posts.map((p) => ({
         url: `/post/${p._id}`,
         changefreq: "weekly",
         priority: 0.8,
-        lastmod: p.updatedAt || undefined,
+        lastmod: p.updatedAt ? new Date(p.updatedAt).toISOString() : undefined,
       })),
     ];
 
@@ -86,7 +95,7 @@ app.get("/sitemap.xml", async (req, res) => {
       "Cache-Control": "public, max-age=3600",
     });
     const xml = await streamToPromise(Readable.from(links).pipe(stream));
-    res.end(xml.toString());
+    return res.end(xml.toString());
   } catch (err) {
     console.error(err);
     return res.status(500).end();
@@ -97,17 +106,23 @@ app.get("/sitemap.xml", async (req, res) => {
 app.get("/rss.xml", async (req, res) => {
   const SITE_URL = process.env.SITE_URL || "https://intraverse.me";
   const feed = new Rss({
-    title: "IntraVerse Blog",
+    title: "IntraVerse",
     description: "Latest articles from IntraVerse Blog",
     feed_url: `${SITE_URL}/rss.xml`,
     site_url: SITE_URL,
     language: "en",
+    pubDate: new Date(),
+    lastBuildDate: new Date(),
   });
+
+  // basic sanitizer (strip tags)
+  const stripTags = (html = "") =>
+    html.replace(/<\/?[^>]+(>|$)/g, "").trim();
 
   let posts = [];
   try {
     posts = await Post.find()
-      .select("title content createdAt")
+      .select("title content createdAt updatedAt")
       .sort({ createdAt: -1 })
       .limit(50)
       .lean();
@@ -116,9 +131,10 @@ app.get("/rss.xml", async (req, res) => {
   }
 
   posts.forEach((post) => {
+    const plain = stripTags(post.content || "");
     feed.item({
       title: post.title,
-      description: post.content,
+      description: plain.length > 400 ? plain.slice(0, 400) + "..." : plain,
       url: `${SITE_URL}/post/${post._id}`,
       date: post.createdAt,
     });
